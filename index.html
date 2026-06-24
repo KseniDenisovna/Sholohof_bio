@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Казачий квест по Шолохову</title>
+    <style>
+        /* ---------- ОБЩИЕ СТИЛИ ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Roboto&display=swap');
+
+        body {
+            font-family: 'Roboto', 'Georgia', serif;
+            background: #2c1e16;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-image: radial-gradient(ellipse at 30% 40%, #4d3527, #1f150f);
+        }
+
+        .game-container {
+            max-width: 880px;
+            width: 100%;
+            background: #f3e8d8;
+            background-image: linear-gradient(145deg, #f7efe2, #e5d5c0);
+            border-radius: 50px 50px 30px 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 0 3px #b2926c inset, 0 0 0 5px #7a5d44 inset;
+            padding: 25px 30px 30px;
+            position: relative;
+            border: 1px solid #c9b094;
+        }
+
+        .game-container::before {
+            content: "⚔️";
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            font-size: 32px;
+            opacity: 0.6;
+            transform: rotate(-15deg);
+        }
+        .game-container::after {
+            content: "🌾";
+            position: absolute;
+            bottom: -10px;
+            right: 20px;
+            font-size: 32px;
+            opacity: 0.5;
+            transform: rotate(10deg);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 4px double #8b6f50;
+            padding-bottom: 14px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .title {
+            font-family: 'Playfair Display', 'Georgia', serif;
+            font-size: 30px;
+            font-weight: 700;
+            color: #4a2e1b;
+            text-shadow: 2px 2px 0 rgba(139, 111, 80, 0.3);
+            letter-spacing: 2px;
+        }
+        .title small {
+            font-size: 18px;
+            font-weight: 400;
+            color: #7a5d44;
+            margin-left: 8px;
+            font-style: italic;
+        }
+
+        .score-box {
+            background: #4a2e1b;
+            color: #f3e8d8;
+            padding: 6px 22px;
+            border-radius: 40px;
+            font-size: 22px;
+            font-weight: bold;
+            box-shadow: inset 0 -4px 0 #7a5d44;
+            border: 2px solid #b2926c;
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* ---------- БЕГУЩАЯ СТРОКА (ЦИТАТЫ) ---------- */
+        .marquee-wrap {
+            background: #1f150f;
+            padding: 8px 0;
+            border-radius: 40px;
+            margin: 12px 0 18px;
+            border: 2px solid #b2926c;
+            box-shadow: inset 0 0 12px #0a0705;
+            overflow: hidden;
+            position: relative;
+        }
+        .marquee-wrap::before {
+            content: "❝";
+            position: absolute;
+            left: 14px;
+            top: 2px;
+            font-size: 30px;
+            color: #ffffff;
+            z-index: 2;
+            font-family: 'Playfair Display', serif;
+            opacity: 0.9;
+        }
+        .marquee-wrap::after {
+            content: "❞";
+            position: absolute;
+            right: 14px;
+            bottom: 2px;
+            font-size: 30px;
+            color: #ffffff;
+            z-index: 2;
+            font-family: 'Playfair Display', serif;
+            opacity: 0.9;
+        }
+
+        .marquee-content {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marqueeScroll 150s linear infinite;
+            animation-delay: 0s; /* сразу начинается */
+            padding-left: 60px;
+            padding-right: 60px;
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            color: #ffffff;
+            font-style: italic;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        .marquee-wrap:hover .marquee-content {
+            animation-play-state: paused;
+        }
+
+        .marquee-content span {
+            margin: 0 40px;
+            color: #ffffff;
+        }
+
+        /* Новая анимация: текст сразу виден и движется влево */
+        @keyframes marqueeScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* ---------- ПРОГРЕСС ---------- */
+        .progress-wrap {
+            background: #b2926c;
+            height: 16px;
+            border-radius: 20px;
+            margin: 10px 0 20px;
+            box-shadow: inset 0 3px 8px rgba(0,0,0,0.4);
+            border: 1px solid #7a5d44;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #b34a2c;
+            background: linear-gradient(90deg, #c06a3e, #8f3d22);
+            border-radius: 20px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px #b87a5a;
+        }
+
+        .chapter-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 18px;
+            background: rgba(180, 140, 110, 0.25);
+            border-radius: 30px;
+            padding: 10px 20px;
+            border: 2px solid #b2926c;
+            flex-wrap: wrap;
+        }
+
+        .chapter-emblema {
+            font-size: 44px;
+            line-height: 1;
+            filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.3));
+            flex-shrink: 0;
+        }
+
+        .chapter-meta {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .chapter-badge {
+            display: inline-block;
+            background: #4a2e1b;
+            color: #f3e8d8;
+            padding: 4px 18px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border: 1px solid #b2926c;
+            box-shadow: inset 0 -2px 0 #1f150f;
+        }
+
+        .chapter-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: #2d1c10;
+            margin-top: 2px;
+            text-shadow: 1px 1px 0 rgba(255,255,200,0.3);
+        }
+
+        .question-counter {
+            font-size: 16px;
+            color: #6b4f36;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .question-area {
+            min-height: 240px;
+            display: flex;
+            flex-direction: column;
+            padding: 6px 0 12px;
+        }
+
+        .question-text {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 23px;
+            font-weight: 600;
+            color: #2d1c10;
+            line-height: 1.4;
+            margin-bottom: 22px;
+            padding: 0 5px;
+            font-family: 'Playfair Display', serif;
+        }
+        .question-icon {
+            font-size: 40px;
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background: #fcf6ed;
+            border: 2px solid #b2926c;
+            border-radius: 60px;
+            padding: 14px 24px;
+            font-size: 19px;
+            font-weight: 500;
+            color: #2d1c10;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 5px 0 #8f7356;
+            font-family: 'Roboto', 'Georgia', serif;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 #6f553e;
+            background: #fff9f0;
+            border-color: #7a5d44;
+        }
+        .option-btn:active:not(:disabled) {
+            transform: translateY(5px);
+            box-shadow: 0 0px 0 #6f553e;
+        }
+        .option-btn.correct {
+            background: #3f7840;
+            border-color: #1f4f20;
+            color: white;
+            box-shadow: 0 5px 0 #1f4f20;
+            pointer-events: none;
+        }
+        .option-btn.wrong {
+            background: #b14a4a;
+            border-color: #7a2a2a;
+            color: white;
+            box-shadow: 0 5px 0 #5a1e1e;
+            pointer-events: none;
+        }
+        .option-btn:disabled {
+            opacity: 0.8;
+            cursor: default;
+        }
+
+        .feedback {
+            margin: 15px 0 10px;
+            font-size: 18px;
+            padding: 12px 18px;
+            border-radius: 30px;
+            background: #e5d5c0;
+            border-left: 10px solid #7a5d44;
+            color: #2d1c10;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            border: 1px solid #b2926c;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .next-btn {
+            background: #4a2e1b;
+            border: none;
+            color: #f3e8d8;
+            font-size: 22px;
+            font-weight: 600;
+            padding: 16px 30px;
+            border-radius: 60px;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.2s;
+            letter-spacing: 1.5px;
+            margin-top: 12px;
+            border-bottom: 5px solid #1f150f;
+            font-family: 'Playfair Display', serif;
+        }
+        .next-btn:hover:not(:disabled) {
+            background: #6b4f36;
+            transform: scale(1.01);
+        }
+        .next-btn:disabled {
+            opacity: 0.4;
+            transform: none;
+            cursor: not-allowed;
+        }
+
+        .finish-screen {
+            text-align: center;
+            padding: 30px 10px 15px;
+        }
+        .finish-screen h2 {
+            font-size: 40px;
+            color: #4a2e1b;
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 12px;
+        }
+        .finish-screen p {
+            font-size: 22px;
+            color: #2d1c10;
+            margin: 15px 0;
+        }
+        .finish-score {
+            background: #4a2e1b;
+            color: #f3e8d8;
+            display: inline-block;
+            padding: 12px 40px;
+            border-radius: 60px;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 20px 0;
+            border: 3px solid #b2926c;
+        }
+        .restart-btn {
+            background: #8f3d22;
+            border: none;
+            color: white;
+            font-size: 24px;
+            padding: 18px 48px;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 20px;
+            border-bottom: 6px solid #5a2a1a;
+            font-weight: 600;
+            font-family: 'Playfair Display', serif;
+        }
+        .restart-btn:hover {
+            background: #b34a2c;
+            transform: scale(1.02);
+        }
+
+        .footnote {
+            margin-top: 25px;
+            text-align: right;
+            font-size: 15px;
+            color: #6b4f36;
+            border-top: 2px dashed #b2926c;
+            padding-top: 15px;
+            font-style: italic;
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* ---------- АДАПТИВ ---------- */
+        @media (max-width: 600px) {
+            .game-container { padding: 16px; }
+            .title { font-size: 24px; }
+            .chapter-title { font-size: 22px; }
+            .question-text { font-size: 20px; flex-wrap: wrap; }
+            .option-btn { font-size: 17px; padding: 12px 18px; }
+            .marquee-content { font-size: 16px; animation-duration: 100s; }
+            .chapter-emblema { font-size: 34px; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container" id="app">
+    <!-- Шапка -->
+    <div class="header">
+        <div class="title">⛰️ Квест <small>Шолохов</small></div>
+        <div class="score-box" id="scoreDisplay">0</div>
+    </div>
+
+    <!-- Бегущая строка с цитатами -->
+    <div class="marquee-wrap">
+        <div class="marquee-content" id="marqueeText">
+            <!-- цитаты заполняются скриптом -->
+        </div>
+    </div>
+
+    <!-- Прогресс -->
+    <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+    </div>
+
+    <!-- Основной блок игры -->
+    <div id="gameBody">
+        <div class="chapter-header">
+            <div class="chapter-emblema" id="chapterEmblema">⚔️</div>
+            <div class="chapter-meta">
+                <div class="chapter-badge" id="chapterBadge">Глава 1</div>
+                <div class="chapter-title" id="chapterTitle">Название</div>
+                <div class="question-counter" id="questionCounter">Вопрос 1 из 3</div>
+            </div>
+        </div>
+        <div class="question-area">
+            <div class="question-text" id="questionText">
+                <span class="question-icon" id="questionIcon">📜</span>
+                <span id="questionTextOnly">Загрузка...</span>
+            </div>
+            <div class="options-grid" id="optionsContainer"></div>
+            <div class="feedback" id="feedbackMessage">👆 Выберите вариант ответа</div>
+            <button class="next-btn" id="nextBtn" disabled>Далее →</button>
+        </div>
+    </div>
+
+    <!-- Финиш -->
+    <div id="finishScreen" style="display: none;" class="finish-screen">
+        <h2>🏆 Квест завершён!</h2>
+        <p>Вы прошли все 7 глав и ответили на 21 вопрос.</p>
+        <div class="finish-score" id="finalScore">0</div>
+        <p style="font-size: 20px;" id="finalMessage">Отлично!</p>
+        <button class="restart-btn" id="restartBtn">🔄 Пройти заново</button>
+    </div>
+
+    <div class="footnote">Михаил Шолохов · 1905–1984 · Донской край</div>
+</div>
+
+<script>
+    (function() {
+        // ---------- ЦИТАТЫ ДЛЯ БЕГУЩЕЙ СТРОКИ ----------
+        const quotes = [
+            "«А жизнь, она не простая, она хитрая.» — «Тихий Дон»",
+            "«Не умеешь — учись, не хочешь — заставь.» — «Поднятая целина»",
+            "«Главное, дети, главное — не падать духом.» — «Судьба человека»",
+            "«Русский человек и в окопе поэт.» — «Они сражались за Родину»",
+            "«Степь под ним вздыхала, как живая.» — «Тихий Дон»",
+            "«Земля — она как баба: её надо любить, тогда она родит.» — «Поднятая целина»",
+            "«Война — это не только пули, но и душа.» — «Судьба человека»"
+        ];
+
+        // Заполняем бегущую строку (повторяем для непрерывности)
+        const marqueeEl = document.getElementById('marqueeText');
+        let marqueeHTML = '';
+        // делаем тройной набор для бесконечности
+        for (let i = 0; i < 3; i++) {
+            quotes.forEach(q => {
+                marqueeHTML += `<span>❝ ${q} ❞</span>`;
+            });
+        }
+        marqueeEl.innerHTML = marqueeHTML;
+
+        // ---------- ДАННЫЕ КВЕСТА: 7 глав, в каждой по 3 вопроса с иконками ----------
+        const chapters = [
+            {
+                title: 'Детство и юность',
+                emblema: '👶',
+                questions: [
+                    {
+                        question: 'В каком году родился Михаил Шолохов?',
+                        icon: '📅',
+                        options: ['1903', '1905', '1907', '1910'],
+                        correct: 1,
+                        info: 'Михаил Александрович Шолохов родился 24 мая 1905 года на хуторе Кружилинском.'
+                    },
+                    {
+                        question: 'Как звали мать Шолохова?',
+                        icon: '👩',
+                        options: ['Анастасия Даниловна', 'Мария Васильевна', 'Екатерина Сергеевна', 'Ольга Ивановна'],
+                        correct: 0,
+                        info: 'Мать писателя — Анастасия Даниловна Черникова, казачка, впоследствии удочерённая мужем.'
+                    },
+                    {
+                        question: 'В каком возрасте Шолохов начал писать свои первые рассказы?',
+                        icon: '✍️',
+                        options: ['12 лет', '15 лет', '17 лет', '19 лет'],
+                        correct: 2,
+                        info: 'Первые литературные опыты Шолохова относятся к 1922 году (17 лет), когда он начал писать рассказы.'
+                    }
+                ]
+            },
+            {
+                title: 'Гражданская война и начало пути',
+                emblema: '⚔️',
+                questions: [
+                    {
+                        question: 'В каком отряде Шолохов участвовал в 1922 году?',
+                        icon: '🪖',
+                        options: ['Продотряд', 'Красная армия', 'Партизанский отряд', 'Махновская армия'],
+                        correct: 0,
+                        info: 'В 1922 году Шолохов служил в продотряде, участвовал в изъятии хлеба и был взят в плен махновцами.'
+                    },
+                    {
+                        question: 'Где Шолохов работал после окончания Гражданской войны?',
+                        icon: '📊',
+                        options: ['Учителем', 'Журналистом', 'Статистиком', 'Бухгалтером'],
+                        correct: 2,
+                        info: 'В 1922–1923 годах Шолохов работал статистиком в станице Вёшенской и налоговиком.'
+                    },
+                    {
+                        question: 'Какое первое крупное произведение Шолохова было опубликовано в 1925 году?',
+                        icon: '📖',
+                        options: ['«Донские рассказы»', '«Смертный враг»', '«Червоточина»', '«Нахаленок»'],
+                        correct: 0,
+                        info: 'В 1925 году вышел сборник «Донские рассказы», который принёс молодому автору известность.'
+                    }
+                ]
+            },
+            {
+                title: '«Тихий Дон»',
+                emblema: '🌊',
+                questions: [
+                    {
+                        question: 'В каком году вышел первый том «Тихого Дона»?',
+                        icon: '📆',
+                        options: ['1926', '1928', '1930', '1932'],
+                        correct: 1,
+                        info: 'Первый том романа был опубликован в 1928 году в журнале «Октябрь».'
+                    },
+                    {
+                        question: 'Сколько лет потребовалось Шолохову на написание всего романа?',
+                        icon: '⏳',
+                        options: ['10 лет', '12 лет', '14 лет', '16 лет'],
+                        correct: 2,
+                        info: 'Работа над «Тихим Доном» длилась около 14 лет — с 1925 по 1940 год.'
+                    },
+                    {
+                        question: 'Кто является главным героем «Тихого Дона»?',
+                        icon: '🤠',
+                        options: ['Григорий Мелехов', 'Аксинья Астахова', 'Пётр Мелехов', 'Илья Бунчук'],
+                        correct: 0,
+                        info: 'Центральный персонаж — донской казак Григорий Мелехов, чья судьба показана на фоне исторических событий.'
+                    }
+                ]
+            },
+            {
+                title: 'Коллективизация и «Поднятая целина»',
+                emblema: '🌾',
+                questions: [
+                    {
+                        question: 'В каком году Шолохов начал работу над романом «Поднятая целина»?',
+                        icon: '📅',
+                        options: ['1930', '1932', '1934', '1936'],
+                        correct: 1,
+                        info: 'Первый том «Поднятой целины» был написан в 1932 году, а второй — спустя 28 лет, в 1960-м.'
+                    },
+                    {
+                        question: 'Как называется хутор, где происходит действие «Поднятой целины»?',
+                        icon: '🏡',
+                        options: ['Гремячий Лог', 'Кружилин', 'Вёшенская', 'Базки'],
+                        correct: 0,
+                        info: 'Действие романа разворачивается на хуторе Гремячий Лог, который прототипически связан с донскими станицами.'
+                    },
+                    {
+                        question: 'Какая тема является центральной в «Поднятой целине»?',
+                        icon: '🚜',
+                        options: ['Коллективизация', 'Гражданская война', 'Великая Отечественная', 'Судьба казачества'],
+                        correct: 0,
+                        info: 'Роман посвящён коллективизации, раскулачиванию и созданию колхозов на Дону.'
+                    }
+                ]
+            },
+            {
+                title: 'В годы Великой Отечественной',
+                emblema: '🎖️',
+                questions: [
+                    {
+                        question: 'В каком году Шолохов был награждён орденом Ленина за вклад в литературу?',
+                        icon: '🏅',
+                        options: ['1939', '1941', '1945', '1950'],
+                        correct: 0,
+                        info: 'В 1939 году Шолохов был награждён орденом Ленина и стал академиком АН СССР.'
+                    },
+                    {
+                        question: 'Какое произведение Шолохова было написано во время войны и посвящено солдатам?',
+                        icon: '📜',
+                        options: ['«Они сражались за Родину»', '«Судьба человека»', '«Наука ненависти»', '«Донские рассказы»'],
+                        correct: 2,
+                        info: 'Повесть «Наука ненависти» (1942) — одно из первых военных произведений Шолохова.'
+                    },
+                    {
+                        question: 'Где Шолохов работал военным корреспондентом в годы войны?',
+                        icon: '📰',
+                        options: ['В «Красной звезде»', 'В «Правде»', 'В «Известиях»', 'В «Комсомольской правде»'],
+                        correct: 0,
+                        info: 'Шолохов был корреспондентом газеты «Красная звезда» и часто выезжал на передовую.'
+                    }
+                ]
+            },
+            {
+                title: 'Признание и Нобелевская премия',
+                emblema: '🌟',
+                questions: [
+                    {
+                        question: 'В каком году Шолохов стал лауреатом Ленинской премии?',
+                        icon: '🏆',
+                        options: ['1960', '1965', '1970', '1975'],
+                        correct: 0,
+                        info: 'В 1960 году Шолохов получил Ленинскую премию за роман «Поднятая целина».'
+                    },
+                    {
+                        question: 'За какой роман Шолохову была присуждена Нобелевская премия?',
+                        icon: '📚',
+                        options: ['«Тихий Дон»', '«Поднятая целина»', '«Судьба человека»', '«Они сражались за Родину»'],
+                        correct: 0,
+                        info: 'Нобелевский комитет отметил «художественную силу и цельность эпоса о донском казачестве» — то есть «Тихий Дон».'
+                    },
+                    {
+                        question: 'В каком году Шолохов получил Нобелевскую премию?',
+                        icon: '🎯',
+                        options: ['1965', '1967', '1969', '1971'],
+                        correct: 0,
+                        info: 'Михаил Шолохов стал нобелевским лауреатом в 1965 году.'
+                    }
+                ]
+            },
+            {
+                title: 'Последние годы и память',
+                emblema: '🕊️',
+                questions: [
+                    {
+                        question: 'В каком году Шолохов завершил свой последний роман «Они сражались за Родину»?',
+                        icon: '📕',
+                        options: ['Остался незавершённым', '1969', '1973', '1980'],
+                        correct: 0,
+                        info: 'Роман «Они сражались за Родину» так и не был дописан, опубликованы лишь отдельные главы.'
+                    },
+                    {
+                        question: 'Где находится музей-заповедник Шолохова?',
+                        icon: '🏛️',
+                        options: ['В станице Вёшенской', 'В Ростове-на-Дону', 'В Москве', 'На хуторе Кружилинском'],
+                        correct: 0,
+                        info: 'Государственный музей-заповедник М.А. Шолохова расположен в станице Вёшенской Ростовской области.'
+                    },
+                    {
+                        question: 'В каком году умер Михаил Шолохов?',
+                        icon: '⏰',
+                        options: ['1982', '1984', '1986', '1988'],
+                        correct: 1,
+                        info: 'Михаил Александрович Шолохов скончался 21 февраля 1984 года и похоронен в станице Вёшенской.'
+                    }
+                ]
+            }
+        ];
+
+        // ---------- СОСТОЯНИЕ ----------
+        let currentChapterIndex = 0;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+        let gameFinished = false;
+
+        const totalQuestions = chapters.reduce((acc, ch) => acc + ch.questions.length, 0);
+
+        // DOM
+        const gameBody = document.getElementById('gameBody');
+        const finishScreen = document.getElementById('finishScreen');
+        const chapterBadge = document.getElementById('chapterBadge');
+        const chapterTitle = document.getElementById('chapterTitle');
+        const chapterEmblema = document.getElementById('chapterEmblema');
+        const questionCounter = document.getElementById('questionCounter');
+        const questionTextOnly = document.getElementById('questionTextOnly');
+        const questionIcon = document.getElementById('questionIcon');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const feedbackMessage = document.getElementById('feedbackMessage');
+        const nextBtn = document.getElementById('nextBtn');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const progressBar = document.getElementById('progressBar');
+        const finalScore = document.getElementById('finalScore');
+        const finalMessage = document.getElementById('finalMessage');
+        const restartBtn = document.getElementById('restartBtn');
+
+        // ---------- ФУНКЦИИ ----------
+        function getCurrentQuestion() {
+            return chapters[currentChapterIndex].questions[currentQuestionIndex];
+        }
+
+        function renderCurrentQuestion() {
+            const chapter = chapters[currentChapterIndex];
+            const question = getCurrentQuestion();
+
+            chapterBadge.textContent = `Глава ${currentChapterIndex + 1}`;
+            chapterTitle.textContent = chapter.title;
+            chapterEmblema.textContent = chapter.emblema;
+            questionCounter.textContent = `Вопрос ${currentQuestionIndex + 1} из ${chapter.questions.length}`;
+
+            questionTextOnly.textContent = question.question;
+            questionIcon.textContent = question.icon || '📜';
+
+            // Рендерим варианты
+            optionsContainer.innerHTML = '';
+            question.options.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.dataset.index = i;
+                btn.addEventListener('click', () => handleOptionClick(i, btn));
+                optionsContainer.appendChild(btn);
+            });
+
+            answered = false;
+            feedbackMessage.innerHTML = '👆 Выберите вариант ответа';
+            feedbackMessage.style.borderLeftColor = '#7a5d44';
+            nextBtn.disabled = true;
+
+            document.querySelectorAll('.option-btn').forEach(b => {
+                b.classList.remove('correct', 'wrong');
+                b.disabled = false;
+            });
+
+            updateProgress();
+            updateScore();
+        }
+
+        function handleOptionClick(selectedIndex, btnElement) {
+            if (answered) return;
+            const question = getCurrentQuestion();
+            const isCorrect = (selectedIndex === question.correct);
+            const allBtns = document.querySelectorAll('.option-btn');
+
+            allBtns.forEach(b => b.disabled = true);
+
+            allBtns.forEach((b, idx) => {
+                if (idx === question.correct) b.classList.add('correct');
+                else if (idx === selectedIndex && !isCorrect) b.classList.add('wrong');
+            });
+
+            if (isCorrect) {
+                score++;
+                feedbackMessage.innerHTML = '✅ Верно! ' + question.info;
+                feedbackMessage.style.borderLeftColor = '#3f7840';
+            } else {
+                feedbackMessage.innerHTML = '❌ Неверно. ' + question.info;
+                feedbackMessage.style.borderLeftColor = '#b14a4a';
+            }
+
+            answered = true;
+            nextBtn.disabled = false;
+            updateScore();
+        }
+
+        function nextStep() {
+            if (!answered) return;
+
+            const chapter = chapters[currentChapterIndex];
+            if (currentQuestionIndex < chapter.questions.length - 1) {
+                currentQuestionIndex++;
+                renderCurrentQuestion();
+            } else {
+                if (currentChapterIndex < chapters.length - 1) {
+                    currentChapterIndex++;
+                    currentQuestionIndex = 0;
+                    renderCurrentQuestion();
+                } else {
+                    finishGame();
+                }
+            }
+        }
+
+        function finishGame() {
+            gameFinished = true;
+            gameBody.style.display = 'none';
+            finishScreen.style.display = 'block';
+            finalScore.textContent = score + ' / ' + totalQuestions;
+
+            const ratio = score / totalQuestions;
+            let msg = '';
+            if (ratio === 1) msg = '🌟 Гениально! Вы знаете Шолохова как никто!';
+            else if (ratio >= 0.8) msg = '📚 Отличный результат! Вы настоящий знаток!';
+            else if (ratio >= 0.5) msg = '📖 Неплохо! Стоит перечитать биографию.';
+            else msg = '📝 Попробуйте ещё раз, чтобы узнать больше о Шолохове.';
+            finalMessage.textContent = msg;
+
+            progressBar.style.width = '100%';
+            updateScore();
+        }
+
+        function updateProgress() {
+            const answeredQuestions = chapters.reduce((acc, ch, idx) => {
+                if (idx < currentChapterIndex) return acc + ch.questions.length;
+                if (idx === currentChapterIndex) return acc + currentQuestionIndex + (answered ? 1 : 0);
+                return acc;
+            }, 0);
+            const percent = totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0;
+            progressBar.style.width = Math.min(percent, 100) + '%';
+        }
+
+        function updateScore() {
+            scoreDisplay.textContent = score;
+        }
+
+        function restartGame() {
+            currentChapterIndex = 0;
+            currentQuestionIndex = 0;
+            score = 0;
+            answered = false;
+            gameFinished = false;
+
+            gameBody.style.display = 'block';
+            finishScreen.style.display = 'none';
+            renderCurrentQuestion();
+            updateScore();
+            progressBar.style.width = '0%';
+        }
+
+        // ---------- СОБЫТИЯ ----------
+        nextBtn.addEventListener('click', nextStep);
+        restartBtn.addEventListener('click', restartGame);
+
+        // ---------- СТАРТ ----------
+        renderCurrentQuestion();
+
+    })();
+</script>
+</body>
+</html>
